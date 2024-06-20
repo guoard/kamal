@@ -117,31 +117,29 @@ class Kamal::Cli::Accessory < Kamal::Cli::Base
   desc "exec [NAME] [CMD]", "Execute a custom command on servers (use --help to show options)"
   option :interactive, aliases: "-i", type: :boolean, default: false, desc: "Execute command over ssh for an interactive shell (use for console/bash)"
   option :reuse, type: :boolean, default: false, desc: "Reuse currently running container instead of starting a new one"
-  def exec(name, *cmd)
-    cmd = cmd.map { |part| Kamal::Utils.escape_shell_value(part) }
-
+  def exec(name, cmd)
     with_accessory(name) do |accessory, hosts|
       case
       when options[:interactive] && options[:reuse]
         say "Launching interactive command with via SSH from existing container...", :magenta
-        run_locally { exec accessory.execute_in_existing_container_over_ssh(*cmd) }
+        run_locally { exec accessory.execute_in_existing_container_over_ssh(cmd) }
 
       when options[:interactive]
         say "Launching interactive command via SSH from new container...", :magenta
-        run_locally { exec accessory.execute_in_new_container_over_ssh(*cmd) }
+        run_locally { exec accessory.execute_in_new_container_over_ssh(cmd) }
 
       when options[:reuse]
         say "Launching command from existing container...", :magenta
         on(hosts) do
-          execute *KAMAL.auditor.record("Executed cmd '#{cmd.join(" ")}' on #{name} accessory"), verbosity: :debug
-          capture_with_info(*accessory.execute_in_existing_container(*cmd))
+          execute *KAMAL.auditor.record("Executed cmd '#{cmd}' on #{name} accessory"), verbosity: :debug
+          capture_with_info(*accessory.execute_in_existing_container(cmd))
         end
 
       else
         say "Launching command from new container...", :magenta
         on(hosts) do
-          execute *KAMAL.auditor.record("Executed cmd '#{cmd.join(" ")}' on #{name} accessory"), verbosity: :debug
-          capture_with_info(*accessory.execute_in_new_container(*cmd))
+          execute *KAMAL.auditor.record("Executed cmd '#{cmd}' on #{name} accessory"), verbosity: :debug
+          capture_with_info(*accessory.execute_in_new_container(cmd))
         end
       end
     end

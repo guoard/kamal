@@ -82,6 +82,14 @@ class MainTest < IntegrationTest
     assert_equal({ "cmd"=>"wget -qO- http://localhost > /dev/null || exit 1", "interval"=>"1s", "max_attempts"=>3, "port"=>3000, "path"=>"/up", "cord"=>"/tmp/kamal-cord", "log_lines"=>50 }, config[:healthcheck])
   end
 
+  test "aliases" do
+    @app = "app_with_roles"
+
+    kamal :envify
+    kamal :deploy
+    kamal :worker_ls
+  end
+
   test "setup and remove" do
     # Check remove completes when nothing has been setup yet
     kamal :remove, "-y"

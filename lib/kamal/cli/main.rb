@@ -221,15 +221,16 @@ class Kamal::Cli::Main < Kamal::Cli::Base
 
   desc "alias", "Run aliased command", hide: true
   def alias(*args)
-    _alias = KAMAL.alias(args.last)
+    _alias = KAMAL.alias(args.pop)
     if _alias
       all_options = options.deep_merge(_alias.options)
-      arguments = _alias.arguments + args[0..-2]
-      if options[:verbose]
+      arguments = [ _alias.arguments, args.first ].compact.join(" ")
+
+      if all_options[:verbose]
         puts "Invoking alias '#{command}' as '#{_alias.command}' with args '#{arguments}' and options '#{all_options}'"
       end
 
-      invoke "kamal:cli:#{_alias.invocation}", arguments, all_options
+      invoke "kamal:cli:#{_alias.invocation}", [ arguments ], all_options
     else
       self.class.handle_no_command_error(command)
     end

@@ -12,7 +12,7 @@
 aliases:
   console:
     command: app exec
-    arguments: [ "rails console" ]
+    arguments: rails console
     options:
       role: console
       interactive: true
@@ -47,5 +47,5 @@ aliases:
     # Arguments
     #
     # If we want to pass arguments to the command, we do that here.
-    # Otherwise arguments will be forwarded from the command line
-    arguments: [ uname ]
+    # Any arguments passed via the command line will be appended to these
+    arguments: uname -a

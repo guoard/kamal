@@ -37,3 +37,13 @@ accessories:
       - web
 stop_wait_time: 1
 readiness_delay: 0
+aliases:
+  whome:
+    command: version
+  worker_ls:
+    command: app exec
+    arguments: ls
+    options:
+      roles: workers
+      quiet: true
+      interactive: true

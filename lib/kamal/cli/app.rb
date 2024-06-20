@@ -75,15 +75,14 @@ class Kamal::Cli::App < Kamal::Cli::Base
   option :interactive, aliases: "-i", type: :boolean, default: false, desc: "Execute command over ssh for an interactive shell (use for console/bash)"
   option :reuse, type: :boolean, default: false, desc: "Reuse currently running container instead of starting a new one"
   option :env, aliases: "-e", type: :hash, desc: "Set environment variables for the command"
-  def exec(*cmd)
+  def exec(cmd)
     env = options[:env]
-    cmd = cmd.map { |part| Kamal::Utils.escape_shell_value(part) }
     case
     when options[:interactive] && options[:reuse]
       say "Get current version of running container...", :magenta unless options[:version]
       using_version(options[:version] || current_running_version) do |version|
         say "Launching interactive command with version #{version} via SSH from existing container on #{KAMAL.primary_host}...", :magenta
-        run_locally { exec KAMAL.app(role: KAMAL.primary_role, host: KAMAL.primary_host).execute_in_existing_container_over_ssh(*cmd, env: env) }
+        run_locally { exec KAMAL.app(role: KAMAL.primary_role, host: KAMAL.primary_host).execute_in_existing_container_over_ssh(cmd, env: env) }
       end
 
     when options[:interactive]
@@ -91,7 +90,7 @@ class Kamal::Cli::App < Kamal::Cli::Base
       using_version(version_or_latest) do |version|
         say "Launching interactive command with version #{version} via SSH from new container on #{KAMAL.primary_host}...", :magenta
         run_locally do
-          exec KAMAL.app(role: KAMAL.primary_role, host: KAMAL.primary_host).execute_in_new_container_over_ssh(*cmd, env: env)
+          exec KAMAL.app(role: KAMAL.primary_role, host: KAMAL.primary_host).execute_in_new_container_over_ssh(cmd, env: env)
         end
       end
 
@@ -105,7 +104,7 @@ class Kamal::Cli::App < Kamal::Cli::Base
 
           roles.each do |role|
             execute *KAMAL.auditor.record("Executed cmd '#{cmd}' on app version #{version}", role: role), verbosity: :debug
-            puts_by_host host, capture_with_info(*KAMAL.app(role: role, host: host).execute_in_existing_container(*cmd, env: env))
+            puts_by_host host, capture_with_info(*KAMAL.app(role: role, host: host).execute_in_existing_container(cmd, env: env))
           end
         end
       end
@@ -119,7 +118,7 @@ class Kamal::Cli::App < Kamal::Cli::Base
 
           roles.each do |role|
             execute *KAMAL.auditor.record("Executed cmd '#{cmd}' on app version #{version}"), verbosity: :debug
-            puts_by_host host, capture_with_info(*KAMAL.app(role: role, host: host).execute_in_new_container(*cmd, env: env))
+            puts_by_host host, capture_with_info(*KAMAL.app(role: role, host: host).execute_in_new_container(cmd, env: env))
           end
         end
       end
